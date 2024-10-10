@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
-from Activations.Softmax.softmax import Softmax
+from Activations.Relu.relu import ReLU
 from tabulate import tabulate as tb
 
-class SoftmaxUnitTest:
+class ReLUUnitTest:
     def __init__(self, B=4, N=512, M=512, D=256, dtype=torch.float32, print_tb=False):
         self.B = B
         self.N = N
@@ -12,14 +12,14 @@ class SoftmaxUnitTest:
         self.dtype = dtype
         self.print_tb = print_tb
 
-        # Triton softmax and Torch softmax
-        self.softmax = Softmax()
-        self.softmax_torch = nn.Softmax(dim=-1)
+        # Triton ReLU and Torch ReLU
+        self.ReLU = ReLU()
+        self.ReLU_torch = nn.ReLU()
 
     def run(self):
         torch.manual_seed(42)
         # Create the input tensor. (This is an example of an "image" tensor with B H W C layout, however it can be any tensors since
-        # interally tensors get flattened to 2D tensors (-1, C) before softmax computation)
+        # interally tensors get flattened to 2D tensors (-1, C) before ReLU computation)
         input_data = torch.randn(self.B, self.M, self.N, self.D, device='cuda', dtype=self.dtype)
 
         # Create separate tensors for input and input_ref using the same data and ensure gradient computation
@@ -33,8 +33,8 @@ class SoftmaxUnitTest:
         self.forward(input, input_ref, atol, rtol)
 
     def forward(self, input, input_ref, atol, rtol):
-        output = self.softmax(input)
-        output_ref = self.softmax_torch(input_ref)
+        output = self.ReLU(input)
+        output_ref = self.ReLU_torch(input_ref)
         assert torch.allclose(output, output_ref, atol=atol, rtol=rtol), 'Error in forward pass'
         if self.print_tb:
             self.diff_f = (output - output_ref).abs()
@@ -60,6 +60,6 @@ if __name__ == '__main__':
         if i ==0: print('First iteration Slow due to Triton Autotune')
         for D in [32, 64, 128, 256, 512, 1024, 2048]:
             for dtype in [torch.float16, torch.float32, torch.float64]:
-                runner = SoftmaxUnitTest(B, N, M, D, dtype, print_tb)
+                runner = ReLUUnitTest(B, N, M, D, dtype, print_tb)
                 runner.run()
     print('All tests passed!')

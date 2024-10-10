@@ -13,21 +13,18 @@ import triton.language as tl
     key=['N'],
 )
 @triton.jit
-def _softmax_kernel_fwd(X, stride_X_row,
-                        Y, stride_Y_row,
-                        N, BLOCK_SIZE: tl.constexpr):
+def _relu_kernel_fwd(X, stride_X_row,
+                     Y, stride_Y_row,
+                     N, BLOCK_SIZE: tl.constexpr):
     row = tl.program_id(0)
     cols = tl.program_id(1) * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
     X = X + row * stride_X_row
     Y = Y + row * stride_Y_row
-    x = tl.load(X + cols, mask=cols < N, other=-float('inf'))
-    z = x - tl.max(x, axis=0)
-    num = tl.exp(z)
-    denom = tl.sum(num, axis=0)
-    y = num / denom
+    x = tl.load(X + cols, mask=cols < N, other=0.0)
+    y = tl.where(x > 0, x, 0.0)
     tl.store(Y + cols, y, mask=cols < N)
 
-def _softmax_fwd(x):
+def _relu_fwd(x):
     if x.stride(-1) != 1:
         x = x.contiguous()
     batch_shape = x.shape[:-1]
@@ -40,9 +37,9 @@ def _softmax_fwd(x):
     MAX_FUSED_SIZE = 65536 // x.element_size()
     BLOCK_SIZE = min(MAX_FUSED_SIZE, triton.next_power_of_2(N))
     with torch.cuda.device(x.device.index):
-        _softmax_kernel_fwd[grid](x, x.stride(0), 
-                                  out, out.stride(0), 
-                                  N, BLOCK_SIZE=BLOCK_SIZE)
+        _relu_kernel_fwd[grid](x, x.stride(0),
+                               out, out.stride(0),
+                               N, BLOCK_SIZE=BLOCK_SIZE)
     return out.reshape(*batch_shape, out.shape[-1])
 
 @triton.autotune(
@@ -56,10 +53,10 @@ def _softmax_fwd(x):
     key=['N'],
 )
 @triton.jit
-def _softmax_kernel_bwd(X, stride_X_row,
-                        DOUT, stride_DOUT_row,
-                        DX, stride_DX_row,
-                        N, BLOCK_SIZE: tl.constexpr):
+def _relu_kernel_bwd(X, stride_X_row,
+                     DOUT, stride_DOUT_row,
+                     DX, stride_DX_row,
+                     N, BLOCK_SIZE: tl.constexpr):
     row = tl.program_id(0)
     cols = tl.program_id(1) * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
     X = X + row * stride_X_row
@@ -67,12 +64,10 @@ def _softmax_kernel_bwd(X, stride_X_row,
     DX = DX + row * stride_DX_row
     x = tl.load(X + cols, mask=cols < N, other=0.0)
     dout = tl.load(DOUT + cols, mask=cols < N, other=0.0)
-    n_grad = dout * x
-    sum_n_grad = tl.sum(n_grad, axis=0)
-    dx = (-x * sum_n_grad) + n_grad
+    dx = tl.where(x > 0, dout, 0.0) 
     tl.store(DX + cols, dx, mask=cols < N)
 
-def _softmax_bwd(x, dout):
+def _relu_bwd(x, dout):
     if x.stride(-1) != 1:
         x = x.contiguous()
     if dout.stride(-1) != 1:
@@ -88,27 +83,27 @@ def _softmax_bwd(x, dout):
     MAX_FUSED_SIZE = 65536 // x.element_size()
     BLOCK_SIZE = min(MAX_FUSED_SIZE, triton.next_power_of_2(N))
     with torch.cuda.device(x.device.index):
-        _softmax_kernel_bwd[grid](x, x.stride(0), 
-                                  dout, dout.stride(0), 
-                                  dx, dx.stride(0), 
-                                  N, BLOCK_SIZE=BLOCK_SIZE)
+        _relu_kernel_bwd[grid](x, x.stride(0),
+                               dout, dout.stride(0),
+                               dx, dx.stride(0),
+                               N, BLOCK_SIZE=BLOCK_SIZE)
     return dx.reshape(*batch_shape, dx.shape[-1])
 
-class softmax(torch.autograd.Function):
+class relu(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input):
-        output = _softmax_fwd(input)
-        ctx.save_for_backward(output)
+        output = _relu_fwd(input)
+        ctx.save_for_backward(input)
         return output
 
     @staticmethod
     def backward(ctx, d_out):
-        output, = ctx.saved_tensors
-        grad = _softmax_bwd(output, d_out)
+        input, = ctx.saved_tensors
+        grad = _relu_bwd(input, d_out)
         return grad
 
-class Softmax:
+class ReLU:
     def __init__(self):
-        self.softmax_fn = softmax.apply
+        self.relu_fn = relu.apply
     def __call__(self, x):
-        return self.softmax_fn(x)
+        return self.relu_fn(x)
