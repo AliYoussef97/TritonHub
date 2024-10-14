@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from TritonFactory.Layers import Linear
+from TritonHub.Layers import Linear
 from tabulate import tabulate as tb
 
 class LinearUnitTest:

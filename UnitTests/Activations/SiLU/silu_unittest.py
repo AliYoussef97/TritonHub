@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from TritonFactory.Activations import SiLU
+from TritonHub.Activations import SiLU
 from tabulate import tabulate as tb
 
 class SiLUUnitTest:

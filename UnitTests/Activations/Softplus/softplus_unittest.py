@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from TritonFactory.Activations import Softplus
+from TritonHub.Activations import Softplus
 from tabulate import tabulate as tb
 
 class SoftplusUnitTest:

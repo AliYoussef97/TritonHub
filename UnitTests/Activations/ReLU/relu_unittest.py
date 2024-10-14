@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from TritonFactory.Activations import ReLU
+from TritonHub.Activations import ReLU
 from tabulate import tabulate as tb
 
 class ReLUUnitTest:

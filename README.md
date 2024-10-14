@@ -1,16 +1,16 @@
-# TritonFactory
+# TritonHub
 
 ## About
-TritonFactory serves as a container for various PyTorch neural network components written in Triton, offering an easy way to access and integrate Triton-based functions from one centralized source. These components include custom implementations of activation functions, normalization layers, and other neural network operations designed for efficient execution on GPUs.
+TritonHub serves as a container for various PyTorch neural network components written in Triton, offering an easy way to access and integrate Triton-based functions from one centralized source. These components include custom implementations of activation functions, normalization layers, and other neural network operations designed for efficient execution on GPUs.
 
 I hope this repository proves helpful to the community, making Triton-based neural network operations more accessible and convenient for developers and researchers alike.
 
 ## Installation
 
-You can install **TritonFactory** directly from:
+You can install **TritonHub** directly from:
 
 ```bash
-pip install TritonFactory
+pip install TritonHub
 ```
 
 Alternatively, you can install it from the GitHub repository:
@@ -27,7 +27,7 @@ cd Triton-Factory
 python setup.py install
 ```
 
-TritonFactory requires the following dependencies:
+TritonHub requires the following dependencies:
 -   Linux
 -   CUDA
 -   NVIDIA GPU
@@ -36,8 +36,8 @@ TritonFactory requires the following dependencies:
 
 ```python
 import torch
-from TritonFactory.Normalization import LayerNorm
-from TritonFactory.Activation import GeLU
+from TritonHub.Normalization import LayerNorm
+from TritonHub.Activation import GeLU
 
 batch, length, dim = 2, 100, 128
 device = "cuda"
@@ -45,7 +45,7 @@ dtype = torch.float32  # or torch.float16
 
 x = torch.randn(batch, length, dim, device=device, dtype=dtype).to("cuda")
 
-# Initialize LayerNorm and GeLU modules from TritonFactory
+# Initialize LayerNorm and GeLU modules from TritonHub
 layernorm = LayerNorm(128, eps=1e-6, elementwise_affine=True, bias=True, device=device, dtype=dtype)
 gelu = GeLU(approximate='None') # or tanh
 
@@ -76,4 +76,4 @@ If you encounter any bugs or issues with the current version, please feel free t
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/AliYoussef97/Triton-Factory/blob/main/LICENSE) file for more details.
 
 ## Acknowledgments
-Special thanks to the authors of [Mamba](https://github.com/state-spaces/mamba), as parts of their Triton code was influential or some of the modules in TritonFactory.
+Special thanks to the authors of [Mamba](https://github.com/state-spaces/mamba), as parts of their Triton code was influential or some of the modules in TritonHub.

@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from TritonFactory.Activations import GeLU
+from TritonHub.Activations import GeLU
 from tabulate import tabulate as tb
 
 class GeLUUnitTest:

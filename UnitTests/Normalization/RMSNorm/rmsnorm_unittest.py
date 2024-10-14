@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from TritonFactory.Normalization import RMSNorm
+from TritonHub.Normalization import RMSNorm
 from tabulate import tabulate as tb
 
 class RMSNormUnitTest:

@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from TritonFactory.Activations import LeakyReLU
+from TritonHub.Activations import LeakyReLU
 from tabulate import tabulate as tb
 
 class LeakyReLUUnitTest:

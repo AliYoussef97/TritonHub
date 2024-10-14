@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from TritonFactory.Normalization import LayerNorm
+from TritonHub.Normalization import LayerNorm
 from tabulate import tabulate as tb
 
 class LayerNormUnitTest:

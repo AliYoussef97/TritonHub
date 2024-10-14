@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from TritonFactory.Activations import Softmax
+from TritonHub.Activations import Softmax
 from tabulate import tabulate as tb
 
 class SoftmaxUnitTest:
