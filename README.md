@@ -16,14 +16,14 @@ pip install TritonHub
 Alternatively, you can install it from the GitHub repository:
 
 ```bash
-pip install git+https://github.com/AliYoussef97/Triton-Factory.git
+pip install git+https://github.com/AliYoussef97/TritonHub.git
 ```
 
 Or clone the repository and install manually:
 
 ```bash
-git clone https://github.com/AliYoussef97/Triton-Factory.git
-cd Triton-Factory
+git clone https://github.com/AliYoussef97/TritonHub.git
+cd TritonHub
 python setup.py install
 ```
 
@@ -73,7 +73,7 @@ If you encounter any bugs or issues with the current version, please feel free t
 
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/AliYoussef97/Triton-Factory/blob/main/LICENSE) file for more details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/AliYoussef97/TritonHub/blob/main/LICENSE) file for more details.
 
 ## Acknowledgments
 Special thanks to the authors of [Mamba](https://github.com/state-spaces/mamba), as parts of their Triton code was influential or some of the modules in TritonHub.
