@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from Normalization.RMSNorm.rmsnorm import RMSNorm
+from TritonFactory.Normalization import RMSNorm
 from tabulate import tabulate as tb
 
 class RMSNormUnitTest:
@@ -27,7 +27,7 @@ class RMSNormUnitTest:
         input_ref = input_data.clone().detach().requires_grad_(True)
 
         # Set the tolerance for the comparison
-        rtol, atol = rtol, atol = (3e-4, 1e-3) if dtype == torch.float32 else (5e-3, 1e-2)
+        rtol, atol = (3e-4, 1e-3) if dtype == torch.float32 else (5e-3, 1e-2)
         if dtype == torch.float16:
             rtol, atol = 1e-2, 5e-2
         self.forward(input, input_ref, atol, rtol)

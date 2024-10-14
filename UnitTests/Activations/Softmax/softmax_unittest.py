@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
-from Activations.GeLU.gelu import GeLU
+from TritonFactory.Activations import Softmax
 from tabulate import tabulate as tb
 
-class GeLUUnitTest:
-    def __init__(self, B=4, N=512, M=512, D=256, dtype=torch.float32, print_tb=False, approximate='none'):
+class SoftmaxUnitTest:
+    def __init__(self, B=4, N=512, M=512, D=256, dtype=torch.float32, print_tb=False):
         self.B = B
         self.N = N
         self.M = M
@@ -12,14 +12,14 @@ class GeLUUnitTest:
         self.dtype = dtype
         self.print_tb = print_tb
 
-        # Triton GeLU and Torch GeLU
-        self.gelu = GeLU(approximate=approximate)
-        self.gelu_torch = nn.GELU(approximate=approximate)
+        # Triton softmax and Torch softmax
+        self.softmax = Softmax()
+        self.softmax_torch = nn.Softmax(dim=-1)
 
     def run(self):
         torch.manual_seed(42)
         # Create the input tensor. (This is an example of an "image" tensor with B H W C layout, however it can be any tensors since
-        # interally tensors get flattened to 2D tensors (-1, C) before GeLU computation)
+        # interally tensors get flattened to 2D tensors (-1, C) before softmax computation)
         input_data = torch.randn(self.B, self.M, self.N, self.D, device='cuda', dtype=self.dtype)
 
         # Create separate tensors for input and input_ref using the same data and ensure gradient computation
@@ -27,14 +27,14 @@ class GeLUUnitTest:
         input_ref = input_data.clone().detach().requires_grad_(True)
 
         # Set the tolerance for the comparison
-        rtol, atol = rtol, atol = (3e-4, 1e-3) if dtype == torch.float32 else (5e-3, 1e-2)
+        rtol, atol = (3e-4, 1e-3) if dtype == torch.float32 else (5e-3, 1e-2)
         if dtype == torch.float16:
             rtol, atol = 1e-2, 5e-2
         self.forward(input, input_ref, atol, rtol)
 
     def forward(self, input, input_ref, atol, rtol):
-        output = self.gelu(input)
-        output_ref = self.gelu_torch(input_ref)
+        output = self.softmax(input)
+        output_ref = self.softmax_torch(input_ref)
         assert torch.allclose(output, output_ref, atol=atol, rtol=rtol), 'Error in forward pass'
         if self.print_tb:
             self.diff_f = (output - output_ref).abs()
@@ -56,12 +56,10 @@ class GeLUUnitTest:
 if __name__ == '__main__':
     B, N, M = 1, 256, 256
     print_tb = True
-    for app in ['none', 'tanh']:
-        print(f'TESTING WITH {app} APPROXIMATION')   
-        for i in range(2):
-            if i ==0: print('First iteration Slow due to Triton Autotune')
-            for D in [32, 64, 128, 256, 512, 1024, 2048]:
-                for dtype in [torch.float16, torch.float32, torch.float64]:
-                    runner = GeLUUnitTest(B, N, M, D, dtype, print_tb, app)
-                    runner.run()
+    for i in range(2):
+        if i ==0: print('First iteration Slow due to Triton Autotune')
+        for D in [32, 64, 128, 256, 512, 1024, 2048]:
+            for dtype in [torch.float16, torch.float32, torch.float64]:
+                runner = SoftmaxUnitTest(B, N, M, D, dtype, print_tb)
+                runner.run()
     print('All tests passed!')
