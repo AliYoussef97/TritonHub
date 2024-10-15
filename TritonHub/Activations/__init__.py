@@ -5,5 +5,6 @@ from .leaky_relu import LeakyReLU
 from .softmax import Softmax
 from .softplus import Softplus
 from .tanh import Tanh
+from .softmin import Softmin
 
-__all__ = ['GeLU', 'SiLU', 'ReLU', 'LeakyReLU', 'Softmax', 'Softplus', 'Tanh']
+__all__ = ['GeLU', 'SiLU', 'ReLU', 'LeakyReLU', 'Softmax', 'Softplus', 'Tanh', 'Softmin']
