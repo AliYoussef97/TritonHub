@@ -41,11 +41,7 @@ class LinearUnitTest:
         assert torch.allclose(output, output_ref, atol=atol, rtol=rtol), 'Error in forward pass'
         if self.print_tb:
             self.diff_f = (output - output_ref).abs()
-        # TODO: Comment out the below print statement when backward pass is implemented.
-        print(tb([[self.dtype, self.D, self.diff_f.mean().item(), self.diff_f.max().item()]],
-                headers=['Dype', 'Dim', 'Forward Mean Diff', 'Forward Max Diff'], tablefmt='orgtbl'))
-        # TODO: Need to implement backward pass
-        #self.backward(input, input_ref, output, output_ref, atol, rtol)
+        self.backward(input, input_ref, output, output_ref, atol, rtol)
 
     def backward(self, input, input_ref, output, output_ref, atol, rtol):
         g = torch.randn_like(output)

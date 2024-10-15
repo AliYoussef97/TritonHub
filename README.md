@@ -65,7 +65,7 @@ If you encounter any bugs or issues with the current version, please feel free t
 ## TODO
 | Feature                         | Status  |
 |----------------------------------|---------|
-| Linear Layer Backward Pass       | ❌       |
+| Linear Layer Backward Pass       | ✔️      |
 | Include Triton Block Sizes in Autotune | ❌  |
 | Convolution Layer                      | ❌       |
 | BatchNorm                        | ❌       |
